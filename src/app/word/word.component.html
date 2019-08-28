@@ -1,9 +1,10 @@
-<ng-container *ngIf="gameWords$ | async as gameWords">
+<ng-container *ngIf="isPlay$ | async">
   <div
-    *ngFor="let word of gameWords"
+    *ngFor="let word of gameWords$ | async"
     [style.left.px]="word.left"
     [style.top.px]="word.top"
   >
-    {{ word.word }}
+  {{ word.word }}
   </div>
+  <span>score :{{ score$ | async }}</span>
 </ng-container>

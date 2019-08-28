@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input, OnDestroy } from "@angular/core";
 import { Store, select } from "@ngrx/store";
 import { Observable, Subject, interval } from "rxjs";
 import { takeUntil, takeWhile } from "rxjs/operators";
@@ -17,7 +17,9 @@ import { toggleisPlay, removeWord, addScore } from "../app.action";
   templateUrl: "./play-page.component.html",
   styleUrls: ["./play-page.component.css"]
 })
-export class PlayPageComponent implements OnInit {
+export class PlayPageComponent implements OnInit, OnDestroy {
+  private unsubscribe$ = new Subject<void>();
+
   isPlay$: Observable<boolean>;
   isPlay: boolean;
   words$: Observable<any[]>;
@@ -68,4 +70,11 @@ export class PlayPageComponent implements OnInit {
   addScore() {
     this.store.dispatch(addScore());
   }
+
+  ngOnDestroy() {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
+
 }
