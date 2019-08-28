@@ -1,1 +1,16 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+body {
+  display: block;
+  background: #fff;
+  color: #4e4e4e;
+  line-height: 22px;
+  height: 100%;
+  font-family: "San Francisco", -apple-system, system-ui, ".SFNSText-Regular", Malgun Gothic, Dotum, "돋움", Helvetica, "Apple SD Gothic Neo", sans-serif;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}

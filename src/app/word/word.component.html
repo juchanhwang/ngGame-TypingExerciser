@@ -1,0 +1,9 @@
+<ng-container *ngIf="gameWords$ | async as gameWords">
+  <div
+    *ngFor="let word of gameWords"
+    [style.left.px]="word.left"
+    [style.top.px]="word.top"
+  >
+    {{ word.word }}
+  </div>
+</ng-container>

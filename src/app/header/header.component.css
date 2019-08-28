@@ -1,0 +1,12 @@
+h1 {
+  position: relative;
+  height: 96px;
+  text-align: center;
+  margin: 0 12px;
+  padding: 36px 17px 0;
+  line-height: 22px;
+  color: #f8f8f8;
+  text-decoration: none;
+  background-color: #2d2c2d;
+  opacity: 0.8;
+}

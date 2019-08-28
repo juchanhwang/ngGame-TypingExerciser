@@ -1,0 +1,13 @@
+.screen {
+  position: relative;
+  align-items: center;
+  text-align: center;
+  background: #f6f9fc;
+  margin: 0 272px;
+  height: 400px;
+}
+
+.input-container {
+  margin-top: 10px;
+  text-align: center;
+}

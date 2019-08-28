@@ -1,0 +1,12 @@
+:host {
+  display: flex;
+  position: relative;
+  border-bottom: 2px solid #ddd;
+  border-top: none;
+  padding: 10px 400px;
+  height: 40px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0;
+}
