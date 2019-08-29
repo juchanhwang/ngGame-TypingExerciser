@@ -7,8 +7,9 @@ import {
   selectScore,
   selectIsPlay
 } from "../app.reducer";
-import { Observable, Subject, timer, interval, Subscription } from "rxjs";
-import { updateGameWords, loseScore, toggleisPlay } from "../app.action";
+import { Observable, interval, Subscription } from "rxjs";
+import { loseScore, toggleisPlay } from "../app.action";
+import { switchMap } from "rxjs/operators";
 
 @Component({
   selector: "app-word",
@@ -18,47 +19,44 @@ import { updateGameWords, loseScore, toggleisPlay } from "../app.action";
 export class WordComponent implements OnInit {
   private gameSubscription: Subscription;
   private intervalSubscription: Subscription;
-  private unsubscribe$ = new Subject<void>();
 
-  isPlay$: Observable<boolean>;
+  isPlay$: Observable<boolean> = this.store.select(selectIsPlay);
+  gameWords$: Observable<any[]> = this.store.select(selectGameWords);
+  score$: Observable<number> = (this.score$ = this.store.select(selectScore));
   maxWordTop: number = 380;
   fallingSpeed: number = 1;
   intervalTime: number = 60;
-  gameWords$: Observable<any[]>;
-  score$: Observable<number>;
+  isGameOver: boolean = false;
 
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    this.score$ = this.store.select(selectScore);
-    this.gameWords$ = this.store.select(selectGameWords);
-    this.isPlay$ = this.store.select(selectIsPlay);
     this.store.dispatch(toggleisPlay({ isPlay: true }));
 
+    // 원상 복귀
     this.gameSubscription = this.gameWords$.subscribe(words => {
+      // console.log(words);
       this.intervalSubscription = interval(this.intervalTime).subscribe(() => {
         words.forEach(word => {
-          word.top < this.maxWordTop
-            ? (word.top += this.fallingSpeed)
-            : word.top === this.maxWordTop
-            ? this.loseScore(word)
-            : null;
+          if (word.top < this.maxWordTop && !this.isGameOver) {
+            word.top += this.fallingSpeed;
+          } else if (word.top === this.maxWordTop) {
+            this.loseScore(word);
+          }
         });
       });
     });
 
-    this.renderGameWords();
-
+    this.unsubscribeGameWords();
   }
 
-  renderGameWords() {
+  unsubscribeGameWords() {
     this.score$.subscribe(score => {
       if (score === 0) {
-        debugger;
+        this.isGameOver = true;
         this.gameSubscription.unsubscribe();
         this.intervalSubscription.unsubscribe();
         this.store.dispatch(toggleisPlay({ isPlay: false }));
-      } else {
       }
     });
   }
@@ -67,5 +65,4 @@ export class WordComponent implements OnInit {
     this.store.dispatch(loseScore());
     word.top++;
   }
-
 }
