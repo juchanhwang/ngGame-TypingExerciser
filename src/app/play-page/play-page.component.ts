@@ -30,11 +30,14 @@ export class PlayPageComponent implements OnInit {
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
+    this.resetState()
+    this.toggleIsPlay();
+  }
+  resetState() {
     this.store.dispatch(resetState());
-    this.getPlayTrue();
   }
 
-  getPlayTrue() {
+  toggleIsPlay() {
     this.store.dispatch(toggleisPlay({ isPlay: true }));
   }
 

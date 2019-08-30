@@ -40,18 +40,21 @@ export class WordComponent implements OnInit, OnDestroy {
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    this.store.dispatch(toggleisPlay({ isPlay: true }));
     this.getPlay();
     this.getWordTopVal();
+  }
+
+  toggleIsPlay(isPlay) {
+    this.store.dispatch(toggleisPlay({ isPlay: isPlay.isTrue }));
   }
 
   getPlay() {
     this.score$.subscribe(score => {
       if (score === 0) {
         this.isGameOver = true;
-        this.store.dispatch(toggleisPlay({ isPlay: false }));
+        this.toggleIsPlay({ isTrue: false });
       } else {
-        this.store.dispatch(toggleisPlay({ isPlay: true }));
+        this.toggleIsPlay({ isTrue: true });
       }
     });
   }
@@ -64,6 +67,7 @@ export class WordComponent implements OnInit, OnDestroy {
             word.top += this.fallingSpeed;
           } else if (word.top === this.maxWordTop) {
             this.loseScore(word);
+            word.top++;
           }
         });
       });
@@ -72,7 +76,6 @@ export class WordComponent implements OnInit, OnDestroy {
 
   loseScore(word) {
     this.store.dispatch(loseScore());
-    word.top++;
   }
 
   ngOnDestroy(): void {
