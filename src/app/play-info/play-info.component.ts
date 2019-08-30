@@ -18,16 +18,14 @@ export class PlayInfoComponent implements OnInit, OnDestroy {
   countTimeSubscription: Subscription;
 
   gameTime$: Observable<number>;
-  second: number = 1000;
-  isPlay$: Observable<boolean>;
   score$: Observable<number>;
+  second: number = 1000;
 
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
     this.score$ = this.store.select(selectScore);
     this.gameTime$ = this.store.select(selectGameTime);
-    this.isPlay$ = this.store.select(selectIsPlay);
     this.getCountTime();
   }
 

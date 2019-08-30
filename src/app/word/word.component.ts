@@ -66,14 +66,15 @@ export class WordComponent implements OnInit, OnDestroy {
   }
 
   resetGameTime() {
-    this.store.dispatch(countTime(0))
+    const resetTime = 0
+    this.store.dispatch(countTime(resetTime))
   }
 
   getWordTopVal() {
     this.gameWords$.subscribe(words => {
-      // this.intervalSubscription = interval(this.intervalTime).subscribe(() => {
+      this.intervalSubscription = interval(this.intervalTime).subscribe(() => {
       words.forEach(word => {
-        console.log(word)
+        // console.log(word)
         if (word.top < this.maxWordTop && !this.isGameOver) {
           word.top += this.fallingSpeed;
         } else if (word.top === this.maxWordTop) {
@@ -81,7 +82,7 @@ export class WordComponent implements OnInit, OnDestroy {
           word.top++;
         }
       });
-      // });
+      });
     });
 
     // this.gameWords$
@@ -105,6 +106,7 @@ export class WordComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.intervalSubscription.unsubscribe();
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
