@@ -159,6 +159,53 @@ this.store.dispatch(resetState());
 
 
 
+3. ##### Subscribe 안에서 subscribe를 하고있음
+
+```js
+    this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(words => {
+      interval(this.intervalTime)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(() => {
+          words.forEach(word => {
+            if (word.top < this.maxWordTop && !this.isGameOver) {
+              word.top += this.fallingSpeed;
+            } else if (word.top === this.maxWordTop) {
+              this.loseScore(word);
+              word.top++;
+            }
+          });
+        });
+    });
+```
+
+> 해결방안
+
+-  switchMap 함수 활용
+
+```javascript
+    this.gameWords$
+      .pipe(
+        switchMap(
+          () => interval(this.intervalTime),
+          gameWords => {
+            gameWords.forEach((word, wordIdx) => {
+              if (word.top < this.maxWordTop && !this.isGameOver) {
+                word.top += this.fallingSpeed;
+              } else if (word.top >= this.maxWordTop) {
+                word.top = this.initTopVal;
+                this.loseScore(word);
+                this.removeWord(wordIdx);
+              }
+            });
+          }
+        ),
+        takeUntil(this.unsubscribe$)
+      )
+      .subscribe();
+```
+
+
+
 
 
 

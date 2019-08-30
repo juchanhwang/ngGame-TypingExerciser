@@ -9,7 +9,7 @@ import {
   selectGameTime
 } from "../app.reducer";
 import { Observable, interval, Subscription, Subject } from "rxjs";
-import { loseScore, toggleisPlay, countTime } from "../app.action";
+import { loseScore, toggleisPlay, countTime, removeWord } from "../app.action";
 import { switchMap, takeUntil } from "rxjs/operators";
 
 @Component({
@@ -19,31 +19,25 @@ import { switchMap, takeUntil } from "rxjs/operators";
 })
 export class WordComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
-  private intervalSubscription: Subscription;
 
   isPlay$: Observable<boolean>;
   gameWords$: Observable<any[]>;
   score$: Observable<number>;
   gameTime$: Observable<number>;
 
+  initTopVal: number = 35;
   maxWordTop: number = 380;
-  fallingSpeed: number = 1;
+  fallingSpeed: number = 2;
   intervalTime: number = 60;
   isGameOver: boolean = false;
 
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    this.isPlay$ = this.store.select(
-      selectIsPlay,
-      takeUntil(this.unsubscribe$)
-    );
-    this.gameWords$ = this.store.select(
-      selectGameWords,
-      takeUntil(this.unsubscribe$)
-    );
-    this.score$ = this.store.select(selectScore, takeUntil(this.unsubscribe$));
-    this.gameTime$ = this.store.select(selectGameTime, takeUntil(this.unsubscribe$));
+    this.isPlay$ = this.store.select(selectIsPlay);
+    this.gameWords$ = this.store.select(selectGameWords);
+    this.score$ = this.store.select(selectScore);
+    this.gameTime$ = this.store.select(selectGameTime);
 
     this.getPlay();
     this.getWordTopVal();
@@ -54,11 +48,11 @@ export class WordComponent implements OnInit, OnDestroy {
   }
 
   getPlay() {
-    this.score$.subscribe(score => {
+    this.score$.pipe(takeUntil(this.unsubscribe$)).subscribe(score => {
       if (score === 0) {
         this.isGameOver = true;
         this.toggleIsPlay({ isTrue: false });
-        this.resetGameTime()
+        this.resetGameTime();
       } else {
         this.toggleIsPlay({ isTrue: true });
       }
@@ -66,47 +60,41 @@ export class WordComponent implements OnInit, OnDestroy {
   }
 
   resetGameTime() {
-    const resetTime = 0
-    this.store.dispatch(countTime(resetTime))
+    const resetTime = 0;
+    this.store.dispatch(countTime({ time: resetTime }));
   }
 
   getWordTopVal() {
-    this.gameWords$.subscribe(words => {
-      this.intervalSubscription = interval(this.intervalTime).subscribe(() => {
-      words.forEach(word => {
-        // console.log(word)
-        if (word.top < this.maxWordTop && !this.isGameOver) {
-          word.top += this.fallingSpeed;
-        } else if (word.top === this.maxWordTop) {
-          // this.loseScore(word);
-          word.top++;
-        }
-      });
-      });
-    });
-
-    // this.gameWords$
-    //   .pipe(
-    //     switchMap(words => interval(this.intervalTime))
-    //   )
-    //   .subscribe((words) => {
-    //     words.forEach(word => {
-    //       if (word.top < this.maxWordTop && !this.isGameOver) {
-    //         word.top += this.fallingSpeed;
-    //       } else if (word.top === this.maxWordTop) {
-    //         this.loseScore(word);
-    //         word.top++;
-    //       }
-    //     });
-    //   });
+    this.gameWords$
+      .pipe(
+        switchMap(
+          () => interval(this.intervalTime),
+          gameWords => {
+            gameWords.forEach((word, wordIdx) => {
+              if (word.top < this.maxWordTop && !this.isGameOver) {
+                word.top += this.fallingSpeed;
+              } else if (word.top >= this.maxWordTop) {
+                word.top = this.initTopVal;
+                this.loseScore(word);
+                this.removeWord(wordIdx);
+              }
+            });
+          }
+        ),
+        takeUntil(this.unsubscribe$)
+      )
+      .subscribe();
   }
 
   loseScore(word) {
     this.store.dispatch(loseScore());
   }
 
+  removeWord(wordIdx) {
+    this.store.dispatch(removeWord({ idxOfInputVal: wordIdx }));
+  }
+
   ngOnDestroy(): void {
-    this.intervalSubscription.unsubscribe();
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }

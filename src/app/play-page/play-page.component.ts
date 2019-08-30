@@ -27,19 +27,13 @@ export class PlayPageComponent implements OnInit {
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    this.gameWords$ = this.store.select(
-      selectGameWords,
-      takeUntil(this.unsubscribe$)
-    );
-    this.isPlay$ = this.store.select(
-      selectIsPlay,
-      takeUntil(this.unsubscribe$)
-    );
+    this.gameWords$ = this.store.select(selectGameWords);
+    this.isPlay$ = this.store.select(selectIsPlay);
 
     this.resetState();
     this.toggleIsPlay();
   }
-  
+
   resetState() {
     this.store.dispatch(resetState());
   }
@@ -61,8 +55,8 @@ export class PlayPageComponent implements OnInit {
 
   getIdxOfInputVal(inputValue) {
     let IdxOfInputVal;
-    this.gameWords$.subscribe(words => {
-      words.forEach((element, idx) => {
+    this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(gameWords => {
+      gameWords.forEach((element, idx) => {
         if (element.word === inputValue) {
           IdxOfInputVal = idx;
           this.addScore();
