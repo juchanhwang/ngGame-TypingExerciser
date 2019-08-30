@@ -20,18 +20,10 @@ export class WordComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
   private intervalSubscription: Subscription;
 
-  isPlay$: Observable<boolean> = this.store.select(
-    selectIsPlay,
-    takeUntil(this.unsubscribe$)
-  );
-  gameWords$: Observable<any[]> = this.store.select(
-    selectGameWords,
-    takeUntil(this.unsubscribe$)
-  );
-  score$: Observable<number> = this.store.select(
-    selectScore,
-    takeUntil(this.unsubscribe$)
-  );
+  isPlay$: Observable<boolean>;
+  gameWords$: Observable<any[]>;
+  score$: Observable<number>;
+  
   maxWordTop: number = 380;
   fallingSpeed: number = 1;
   intervalTime: number = 60;
@@ -40,6 +32,16 @@ export class WordComponent implements OnInit, OnDestroy {
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
+    this.isPlay$ = this.store.select(
+      selectIsPlay,
+      takeUntil(this.unsubscribe$)
+    );
+    this.gameWords$ = this.store.select(
+      selectGameWords,
+      takeUntil(this.unsubscribe$)
+    );
+    this.score$ = this.store.select(selectScore, takeUntil(this.unsubscribe$));
+
     this.getPlay();
     this.getWordTopVal();
   }
@@ -60,8 +62,22 @@ export class WordComponent implements OnInit, OnDestroy {
   }
 
   getWordTopVal() {
-    this.gameWords$.subscribe(words => {
-      this.intervalSubscription = interval(this.intervalTime).subscribe(() => {
+    // this.gameWords$.subscribe(words => {
+    //   this.intervalSubscription = interval(this.intervalTime).subscribe(() => {
+    //     words.forEach(word => {
+    //       if (word.top < this.maxWordTop && !this.isGameOver) {
+    //         word.top += this.fallingSpeed;
+    //       } else if (word.top === this.maxWordTop) {
+    //         this.loseScore(word);
+    //         word.top++;
+    //       }
+    //     });
+    //   });
+    // });
+
+    this.gameWords$
+      .pipe(switchMap(words => interval(this.intervalTime)))
+      .subscribe(() => {
         words.forEach(word => {
           if (word.top < this.maxWordTop && !this.isGameOver) {
             word.top += this.fallingSpeed;
@@ -71,7 +87,6 @@ export class WordComponent implements OnInit, OnDestroy {
           }
         });
       });
-    });
   }
 
   loseScore(word) {

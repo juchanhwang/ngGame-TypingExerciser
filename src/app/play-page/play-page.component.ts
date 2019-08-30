@@ -20,19 +20,26 @@ import { toggleisPlay, removeWord, addScore, resetState } from "../app.action";
 export class PlayPageComponent implements OnInit {
   private unsubscribe$ = new Subject<void>();
 
-  gameWords$: Observable<any[]> = this.store.select(
-    selectGameWords,
-    takeUntil(this.unsubscribe$)
-  );
-  isPlay$: Observable<boolean> = this.store.select(selectIsPlay);
+  gameWords$: Observable<any[]>;
+  isPlay$: Observable<boolean>;
   isGameOver: boolean = false;
 
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    this.resetState()
+    this.gameWords$ = this.store.select(
+      selectGameWords,
+      takeUntil(this.unsubscribe$)
+    );
+    this.isPlay$ = this.store.select(
+      selectIsPlay,
+      takeUntil(this.unsubscribe$)
+    );
+
+    this.resetState();
     this.toggleIsPlay();
   }
+  
   resetState() {
     this.store.dispatch(resetState());
   }
