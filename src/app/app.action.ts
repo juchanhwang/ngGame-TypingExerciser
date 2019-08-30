@@ -11,3 +11,5 @@ export const removeWord = createAction("removeWord", props<{ idxOfInputVal: numb
 export const countTime = createAction("countTime", props<{ time: number }>());
 export const addScore = createAction("addScore");
 export const loseScore = createAction("loseScore");
+
+export const resetState = createAction("[meta] resetState");

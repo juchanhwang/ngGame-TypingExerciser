@@ -11,19 +11,17 @@ import { toggleisPlay, countTime } from "../app.action";
   styleUrls: ["./main-page.component.css"]
 })
 export class MainPageComponent implements OnInit {
-  isPlay$: Observable<boolean>;
+  isPlay$: Observable<boolean> = this.store.select(selectIsPlay);
   isPlay: boolean;
   gameTime$: number;
 
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    this.stopGame();
+    this.getPlayFalse();
   }
 
-  stopGame() {
-    this.isPlay = false;
-    this.isPlay$ = this.store.select(selectIsPlay);
-    this.store.dispatch(toggleisPlay({ isPlay: this.isPlay }));
+  getPlayFalse() {
+    this.store.dispatch(toggleisPlay({ isPlay: false }));
   }
 }

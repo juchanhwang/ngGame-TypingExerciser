@@ -1,9 +1,16 @@
-<div class="screen">
+<div class="screen" *ngIf="isPlay$ | async">
   <app-play-info></app-play-info>
   <app-word></app-word>
-  <app-game-over *ngIf="!(isPlay$ | async)"></app-game-over>
+</div>
+<div class="screen" *ngIf="!(isPlay$ | async)">
+  <app-play-info></app-play-info>
+  <app-game-over></app-game-over>
+  <span>
+      {{gameWords$ | async | json}}
+  </span>
 </div>
 <div class="input-container">
   <app-input (keyup.enter)="inputEvent($event)"></app-input>
-  <app-button routerLink="/main" (click)="clickStopBtn()">Stop</app-button>
+  <app-button routerLink="/main">Stop</app-button>
 </div>
+<span>{{isPlay$ | async}}</span>

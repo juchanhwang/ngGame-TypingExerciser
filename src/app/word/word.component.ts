@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Store, select } from "@ngrx/store";
 import {
   AppState,
@@ -7,22 +7,31 @@ import {
   selectScore,
   selectIsPlay
 } from "../app.reducer";
-import { Observable, interval, Subscription } from "rxjs";
+import { Observable, interval, Subscription, Subject } from "rxjs";
 import { loseScore, toggleisPlay } from "../app.action";
-import { switchMap } from "rxjs/operators";
+import { switchMap, takeUntil } from "rxjs/operators";
 
 @Component({
   selector: "app-word",
   templateUrl: "./word.component.html",
   styleUrls: ["./word.component.css"]
 })
-export class WordComponent implements OnInit {
-  private gameSubscription: Subscription;
+export class WordComponent implements OnInit, OnDestroy {
+  private unsubscribe$ = new Subject<void>();
   private intervalSubscription: Subscription;
 
-  isPlay$: Observable<boolean> = this.store.select(selectIsPlay);
-  gameWords$: Observable<any[]> = this.store.select(selectGameWords);
-  score$: Observable<number> = (this.score$ = this.store.select(selectScore));
+  isPlay$: Observable<boolean> = this.store.select(
+    selectIsPlay,
+    takeUntil(this.unsubscribe$)
+  );
+  gameWords$: Observable<any[]> = this.store.select(
+    selectGameWords,
+    takeUntil(this.unsubscribe$)
+  );
+  score$: Observable<number> = this.store.select(
+    selectScore,
+    takeUntil(this.unsubscribe$)
+  );
   maxWordTop: number = 380;
   fallingSpeed: number = 1;
   intervalTime: number = 60;
@@ -32,10 +41,23 @@ export class WordComponent implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(toggleisPlay({ isPlay: true }));
+    this.getPlay();
+    this.getWordTopVal();
+  }
 
-    // 원상 복귀
-    this.gameSubscription = this.gameWords$.subscribe(words => {
-      // console.log(words);
+  getPlay() {
+    this.score$.subscribe(score => {
+      if (score === 0) {
+        this.isGameOver = true;
+        this.store.dispatch(toggleisPlay({ isPlay: false }));
+      } else {
+        this.store.dispatch(toggleisPlay({ isPlay: true }));
+      }
+    });
+  }
+
+  getWordTopVal() {
+    this.gameWords$.subscribe(words => {
       this.intervalSubscription = interval(this.intervalTime).subscribe(() => {
         words.forEach(word => {
           if (word.top < this.maxWordTop && !this.isGameOver) {
@@ -46,23 +68,15 @@ export class WordComponent implements OnInit {
         });
       });
     });
-
-    this.unsubscribeGameWords();
-  }
-
-  unsubscribeGameWords() {
-    this.score$.subscribe(score => {
-      if (score === 0) {
-        this.isGameOver = true;
-        this.gameSubscription.unsubscribe();
-        this.intervalSubscription.unsubscribe();
-        this.store.dispatch(toggleisPlay({ isPlay: false }));
-      }
-    });
   }
 
   loseScore(word) {
     this.store.dispatch(loseScore());
     word.top++;
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 }

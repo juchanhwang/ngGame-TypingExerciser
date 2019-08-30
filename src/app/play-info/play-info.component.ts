@@ -15,7 +15,7 @@ import { Observable, Subject, timer } from "rxjs";
   styleUrls: ["./play-info.component.css"]
 })
 export class PlayInfoComponent implements OnInit {
-  private unsubscribe$ = new Subject<void>();
+  
   gameTime$: Observable<number>;
   second: number = 1000;
   isPlay$: Observable<boolean>;

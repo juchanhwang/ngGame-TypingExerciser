@@ -1,6 +1,6 @@
-import { Component, OnInit, Input, OnDestroy } from "@angular/core";
+import { Component, OnInit, Input } from "@angular/core";
 import { Store, select } from "@ngrx/store";
-import { Observable, Subject, interval } from "rxjs";
+import { Observable, Subject, interval, Subscription } from "rxjs";
 import { takeUntil, takeWhile } from "rxjs/operators";
 
 import {
@@ -10,42 +10,38 @@ import {
   selectGameWords,
   selectScore
 } from "../app.reducer";
-import { toggleisPlay, removeWord, addScore } from "../app.action";
+import { toggleisPlay, removeWord, addScore, resetState } from "../app.action";
 
 @Component({
   selector: "app-play-page",
   templateUrl: "./play-page.component.html",
   styleUrls: ["./play-page.component.css"]
 })
-export class PlayPageComponent implements OnInit, OnDestroy {
+export class PlayPageComponent implements OnInit {
   private unsubscribe$ = new Subject<void>();
 
-  isPlay$: Observable<boolean>;
-  isPlay: boolean;
-  words$: Observable<any[]>;
+  gameWords$: Observable<any[]> = this.store.select(
+    selectGameWords,
+    takeUntil(this.unsubscribe$)
+  );
+  isPlay$: Observable<boolean> = this.store.select(selectIsPlay);
+  isGameOver: boolean = false;
 
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    this.startGame();
-    this.store.select(selectScore).subscribe(score => {
-      if (score === 0) {
-        this.isPlay = false;
-        this.store.dispatch(toggleisPlay({ isPlay: this.isPlay }));
-      }
-    });
+    this.store.dispatch(resetState());
+    this.getPlayTrue();
   }
 
-  startGame() {
-    this.isPlay = true;
-    this.isPlay$ = this.store.select(selectIsPlay);
-    this.store.dispatch(toggleisPlay({ isPlay: this.isPlay }));
+  getPlayTrue() {
+    this.store.dispatch(toggleisPlay({ isPlay: true }));
   }
 
   inputEvent(event) {
     const inputValue = event.target.value;
     this.removeWord(inputValue);
-    event.target.value = "";
+    this.initInputVal(event);
   }
 
   removeWord(inputValue) {
@@ -55,7 +51,7 @@ export class PlayPageComponent implements OnInit, OnDestroy {
 
   getIdxOfInputVal(inputValue) {
     let IdxOfInputVal;
-    this.store.select(selectGameWords).subscribe(words => {
+    this.gameWords$.subscribe(words => {
       words.forEach((element, idx) => {
         if (element.word === inputValue) {
           IdxOfInputVal = idx;
@@ -71,10 +67,13 @@ export class PlayPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(addScore());
   }
 
-  ngOnDestroy() {
+  initInputVal(event) {
+    const initialVal = "";
+    event.target.value = initialVal;
+  }
+
+  ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
-
-
 }

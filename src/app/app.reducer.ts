@@ -7,7 +7,8 @@ import {
   updateGameWords,
   addScore,
   loseScore,
-  countTime
+  countTime,
+  resetState
 } from "./app.action";
 import { GameEffects } from "./app.effects";
 
@@ -84,11 +85,12 @@ export const gameReducer = createReducer(
     return { ...state, score: state.score + 1 };
   }),
   on(loseScore, state => {
-    return { ...state, score: state.score -1 };
+    return { ...state, score: state.score - 1 };
   }),
   on(countTime, (state, action) => {
-    return {...state, gameTime: action.time}
-  })
+    return { ...state, gameTime: action.time };
+  }),
+  on(resetState, state => initialState)
 );
 
 export function reducer(state: GameState | undefined, action: Action) {
