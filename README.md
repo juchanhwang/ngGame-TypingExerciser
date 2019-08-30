@@ -72,7 +72,7 @@
 
 - ##### word component의 template파일에 
 
-```js
+```html
 <ng-container *ngIf="score$ | async">
   <div
     *ngFor="let word of gameWords$ | async"
@@ -94,12 +94,36 @@
 
 - `<ng-container *ngIf="isPlay$ | async">` 로 수정했다. `score === 0` 이면, `isPlay = false`의 값을 할당 받는다. isPlay의 값이 'true' 일 때에만 구독한다.
 
+```html
+<ng-container *ngIf="isPlay$ | async">
+    <div
+      *ngFor="let word of gameWords$ | async"
+      [style.left.px]="word.left"
+      [style.top.px]="word.top"
+    >
+    {{ word.word }}
+  </div>
+  </ng-container>
+```
+
   ```js
-  if (score === 0) {
-  	this.isGameOver = true;
-  	this.gameSubscription.unsubscribe();
-  	this.intervalSubscription.unsubscribe();
-  	this.store.dispatch(toggleisPlay({ isPlay: false }));
+    gameWords$: Observable<any[]> = this.store.select(
+      selectGameWords,
+      takeUntil(this.unsubscribe$)
+  	);
+  
+  /*...*/
+  	if (score === 0) {
+  		this.isGameOver = true;
+      this.store.dispatch(toggleisPlay({ isPlay: false }));
+    } else {
+        this.store.dispatch(toggleisPlay({ isPlay: true }));
+    }
+  /*...*/
+  
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
   ```
 
