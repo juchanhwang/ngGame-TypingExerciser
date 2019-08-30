@@ -5,10 +5,11 @@ import {
   selectWords,
   selectGameWords,
   selectScore,
-  selectIsPlay
+  selectIsPlay,
+  selectGameTime
 } from "../app.reducer";
 import { Observable, interval, Subscription, Subject } from "rxjs";
-import { loseScore, toggleisPlay } from "../app.action";
+import { loseScore, toggleisPlay, countTime } from "../app.action";
 import { switchMap, takeUntil } from "rxjs/operators";
 
 @Component({
@@ -23,7 +24,8 @@ export class WordComponent implements OnInit, OnDestroy {
   isPlay$: Observable<boolean>;
   gameWords$: Observable<any[]>;
   score$: Observable<number>;
-  
+  gameTime$: Observable<number>;
+
   maxWordTop: number = 380;
   fallingSpeed: number = 1;
   intervalTime: number = 60;
@@ -41,6 +43,7 @@ export class WordComponent implements OnInit, OnDestroy {
       takeUntil(this.unsubscribe$)
     );
     this.score$ = this.store.select(selectScore, takeUntil(this.unsubscribe$));
+    this.gameTime$ = this.store.select(selectGameTime, takeUntil(this.unsubscribe$));
 
     this.getPlay();
     this.getWordTopVal();
@@ -55,15 +58,37 @@ export class WordComponent implements OnInit, OnDestroy {
       if (score === 0) {
         this.isGameOver = true;
         this.toggleIsPlay({ isTrue: false });
+        this.resetGameTime()
       } else {
         this.toggleIsPlay({ isTrue: true });
       }
     });
   }
 
+  resetGameTime() {
+    this.store.dispatch(countTime(0))
+  }
+
   getWordTopVal() {
-    // this.gameWords$.subscribe(words => {
-    //   this.intervalSubscription = interval(this.intervalTime).subscribe(() => {
+    this.gameWords$.subscribe(words => {
+      // this.intervalSubscription = interval(this.intervalTime).subscribe(() => {
+      words.forEach(word => {
+        console.log(word)
+        if (word.top < this.maxWordTop && !this.isGameOver) {
+          word.top += this.fallingSpeed;
+        } else if (word.top === this.maxWordTop) {
+          // this.loseScore(word);
+          word.top++;
+        }
+      });
+      // });
+    });
+
+    // this.gameWords$
+    //   .pipe(
+    //     switchMap(words => interval(this.intervalTime))
+    //   )
+    //   .subscribe((words) => {
     //     words.forEach(word => {
     //       if (word.top < this.maxWordTop && !this.isGameOver) {
     //         word.top += this.fallingSpeed;
@@ -73,20 +98,6 @@ export class WordComponent implements OnInit, OnDestroy {
     //       }
     //     });
     //   });
-    // });
-
-    this.gameWords$
-      .pipe(switchMap(words => interval(this.intervalTime)))
-      .subscribe(() => {
-        words.forEach(word => {
-          if (word.top < this.maxWordTop && !this.isGameOver) {
-            word.top += this.fallingSpeed;
-          } else if (word.top === this.maxWordTop) {
-            this.loseScore(word);
-            word.top++;
-          }
-        });
-      });
   }
 
   loseScore(word) {
