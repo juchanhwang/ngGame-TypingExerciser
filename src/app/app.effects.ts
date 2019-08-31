@@ -5,6 +5,7 @@ import { map, mergeMap, catchError, takeWhile } from "rxjs/operators";
 import { AppService } from "./app.service";
 import { getWordData, setWordData } from "./app.action";
 import makeWordData from "./utils/makeWordData";
+import { Word } from '../type';
 
 @Injectable()
 export class GameEffects {
@@ -13,10 +14,7 @@ export class GameEffects {
       ofType(getWordData),
       mergeMap(() =>
         this.apiService.getWordList().pipe(
-          map(word => {
-            const wordData = makeWordData(word);
-            return setWordData({ wordData });
-          }),
+          map((wordData: Word[]) =>  setWordData({ wordData })),
           catchError(() => EMPTY)
         )
       )

@@ -8,7 +8,7 @@ import {
   selectGameWords,
   AppState
 } from "./app.reducer";
-import { getWordData, setGameWord } from "./app.action";
+import { getWordData } from "./app.action";
 import { AppService } from "./app.service";
 import { takeWhile, map } from "rxjs/operators";
 
@@ -20,16 +20,6 @@ import { takeWhile, map } from "rxjs/operators";
 export class AppComponent {
   constructor(private store: Store<AppState>) {}
   ngOnInit() {
-    this.store.select(selectWords).subscribe(wordData => {
-      if (wordData.length > 0) {
-        interval(1000)
-          .pipe(
-            takeWhile(n => n < wordData.length),
-            map(n => this.store.dispatch(setGameWord({ word: wordData[n] })))
-          )
-          .subscribe();
-      }
-    });
     this.store.dispatch(getWordData());
   }
 }

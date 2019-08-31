@@ -3,7 +3,7 @@ import { Store, select } from "@ngrx/store";
 import { Observable, Subject } from "rxjs";
 
 import { AppState, selectIsPlay } from "../app.reducer";
-import { toggleisPlay} from "../app.action";
+import { toggleisPlay } from "../app.action";
 
 @Component({
   selector: "app-main-page",
@@ -22,12 +22,12 @@ export class MainPageComponent implements OnInit, OnDestroy {
     this.getPlayFalse();
   }
 
-  getPlayFalse() {
-    this.store.dispatch(toggleisPlay({ isPlay: false }));
-  }
-
   ngOnDestroy() {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  getPlayFalse() {
+    this.store.dispatch(toggleisPlay({ isPlay: false }));
   }
 }

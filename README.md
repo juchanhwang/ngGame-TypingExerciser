@@ -87,7 +87,7 @@
     [style.left.px]="word.left"
     [style.top.px]="word.top"
   >
-  {{ word.word }}
+  {{ word.text }}
   </div>
 </ng-container>
 ```
@@ -109,30 +109,31 @@
       [style.left.px]="word.left"
       [style.top.px]="word.top"
     >
-    {{ word.word }}
+    {{ word.text }}
   </div>
-  </ng-container>
+</ng-container>
 ```
 
   ```js
-    gameWords$: Observable<any[]> = this.store.select(
-      selectGameWords,
-      takeUntil(this.unsubscribe$)
-  	);
+gameWords$: Observable<any[]> = this.store.select(
+    selectGameWords,
+    takeUntil(this.unsubscribe$)
+);
   
-  /*...*/
-  	if (score === 0) {
-  		this.isGameOver = true;
-      this.store.dispatch(toggleisPlay({ isPlay: false }));
+/*...*/
+    if (score === ZERO_SCORE) {
+      this.isGameOver = true;
+      this.toggleIsPlay({ isTrue: false });
+      this.resetGameTime();
     } else {
-        this.store.dispatch(toggleisPlay({ isPlay: true }));
+      this.toggleIsPlay({ isTrue: true });
     }
-  /*...*/
+/*...*/
   
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
-  }
+ngOnDestroy(): void {
+  this.unsubscribe$.next();
+  this.unsubscribe$.complete();
+}
   ```
 
   
@@ -156,7 +157,9 @@ export const resetState = createAction("[meta] resetState");
 ```js
 //reducer.ts
 
-on(resetState, state => initialState);
+  on(resetState, ({ words }) => {
+    return { ...initialState, words };
+  })
 ```
 
 - 그리고, play-page-component에, 게임이 시작될 때마다 state를 reset해주는 메소드를 추가했다.
@@ -170,20 +173,20 @@ this.store.dispatch(resetState());
 3. ##### Subscribe 안에서 subscribe를 하고있음
 
 ```js
-    this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(words => {
-      interval(this.intervalTime)
-        .pipe(takeUntil(this.unsubscribe$))
-        .subscribe(() => {
-          words.forEach(word => {
-            if (word.top < this.maxWordTop && !this.isGameOver) {
-              word.top += this.fallingSpeed;
-            } else if (word.top === this.maxWordTop) {
-              this.loseScore(word);
-              word.top++;
-            }
-          });
-        });
+this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(words => {
+  interval(this.intervalTime)
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe(() => {
+      words.forEach(word => {
+        if (word.top < this.maxWordTop && !this.isGameOver) {
+          word.top += this.fallingSpeed;
+        } else if (word.top === this.maxWordTop) {
+          this.loseScore(word);
+          word.top++;
+        }
+      });
     });
+});
 ```
 
 > 해결방안
@@ -191,25 +194,29 @@ this.store.dispatch(resetState());
 -  switchMap 함수 활용
 
 ```javascript
-    this.gameWords$
-      .pipe(
-        switchMap(
-          () => interval(this.intervalTime),
-          gameWords => {
-            gameWords.forEach((word, wordIdx) => {
-              if (word.top < this.maxWordTop && !this.isGameOver) {
-                word.top += this.fallingSpeed;
-              } else if (word.top >= this.maxWordTop) {
-                word.top = this.initTopVal;
-                this.loseScore(word);
-                this.removeWord(wordIdx);
-              }
-            });
-          }
-        ),
-        takeUntil(this.unsubscribe$)
-      )
-      .subscribe();
+showFallingWords() {
+  this.gameWords$
+    .pipe(
+      switchMap(
+        () => interval(INTERVAL_TIME),
+        gameWords => this.getWordTopVal(gameWords)
+      ),
+      takeUntil(this.unsubscribe$)
+    )
+    .subscribe();
+}
+
+getWordTopVal(gameWords) {
+  gameWords.forEach((word, wordIdx) => {
+    if (word.top < MAX_WORD_TOP && !this.isGameOver) {
+      word.top += FALLING_SPEED;
+    } else if (word.top >= MAX_WORD_TOP) {
+      word.top = INITIAL_TOP_VALUE;
+      this.loseScore();
+      this.removeWord(wordIdx);
+    }
+  });
+}
 ```
 
 

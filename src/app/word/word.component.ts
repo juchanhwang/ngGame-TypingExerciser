@@ -10,7 +10,14 @@ import {
 } from "../app.reducer";
 import { Observable, interval, Subscription, Subject } from "rxjs";
 import { loseScore, toggleisPlay, countTime, removeWord } from "../app.action";
-import { switchMap, takeUntil } from "rxjs/operators";
+import { switchMap, takeUntil, tap, mergeMap } from "rxjs/operators";
+import { GameWord } from "../../type";
+const INTERVAL_TIME = 60;
+const INITIAL_TOP_VALUE = 35;
+const MAX_WORD_TOP = 380;
+const FALLING_SPEED = 2;
+const RESET_TIME = 0;
+const ZERO_SCORE = 0;
 
 @Component({
   selector: "app-word",
@@ -21,13 +28,9 @@ export class WordComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
 
   isPlay$: Observable<boolean>;
-  gameWords$: Observable<any[]>;
+  gameWords$: Observable<GameWord[]>;
   score$: Observable<number>;
 
-  initTopVal: number = 35;
-  maxWordTop: number = 380;
-  fallingSpeed: number = 2;
-  intervalTime: number = 60;
   isGameOver: boolean = false;
 
   constructor(private store: Store<AppState>) {}
@@ -41,9 +44,14 @@ export class WordComponent implements OnInit, OnDestroy {
     this.showFallingWords();
   }
 
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
   getPlay() {
     this.score$.pipe(takeUntil(this.unsubscribe$)).subscribe(score => {
-      if (score === 0) {
+      if (score === ZERO_SCORE) {
         this.isGameOver = true;
         this.toggleIsPlay({ isTrue: false });
         this.resetGameTime();
@@ -58,15 +66,14 @@ export class WordComponent implements OnInit, OnDestroy {
   }
 
   resetGameTime() {
-    const resetTime = 0;
-    this.store.dispatch(countTime({ time: resetTime }));
+    this.store.dispatch(countTime({ time: RESET_TIME }));
   }
 
   showFallingWords() {
     this.gameWords$
       .pipe(
         switchMap(
-          () => interval(this.intervalTime),
+          () => interval(INTERVAL_TIME),
           gameWords => this.getWordTopVal(gameWords)
         ),
         takeUntil(this.unsubscribe$)
@@ -76,10 +83,10 @@ export class WordComponent implements OnInit, OnDestroy {
 
   getWordTopVal(gameWords) {
     gameWords.forEach((word, wordIdx) => {
-      if (word.top < this.maxWordTop && !this.isGameOver) {
-        word.top += this.fallingSpeed;
-      } else if (word.top >= this.maxWordTop) {
-        word.top = this.initTopVal;
+      if (word.top < MAX_WORD_TOP && !this.isGameOver) {
+        word.top += FALLING_SPEED;
+      } else if (word.top >= MAX_WORD_TOP) {
+        word.top = INITIAL_TOP_VALUE;
         this.loseScore();
         this.removeWord(wordIdx);
       }
@@ -92,10 +99,5 @@ export class WordComponent implements OnInit, OnDestroy {
 
   removeWord(wordIdx) {
     this.store.dispatch(removeWord({ curWordIdx: wordIdx }));
-  }
-
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
   }
 }

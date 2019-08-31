@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { Store, select } from "@ngrx/store";
 import { Observable, Subject, interval, Subscription } from "rxjs";
-import { takeUntil, takeWhile } from "rxjs/operators";
+import { takeUntil, takeWhile, map } from "rxjs/operators";
 
 import {
   AppState,
@@ -15,9 +15,11 @@ import {
   removeWord,
   addScore,
   resetState,
-  updateGameWords
+  setGameWord
 } from "../app.action";
-
+import mapToGameWord from "../utils/makeWordData";
+const INITIALVAL = "";
+const INTERVALTIME = 1000;
 @Component({
   selector: "app-play-page",
   templateUrl: "./play-page.component.html",
@@ -25,26 +27,32 @@ import {
 })
 export class PlayPageComponent implements OnInit {
   private unsubscribe$ = new Subject<void>();
+  private wordSubscription: Subscription;
 
+  words$: Observable<any[]>;
   gameWords$: Observable<any[]>;
   isPlay$: Observable<boolean>;
+  isPlay: boolean;
 
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
+    this.words$ = this.store.select(selectWords);
     this.gameWords$ = this.store.select(selectGameWords);
     this.isPlay$ = this.store.select(selectIsPlay);
 
-    this.resetState();
-    this.toggleIsPlay();
+    this.getPlayState();
   }
 
-  resetState() {
-    this.store.dispatch(resetState());
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
-  toggleIsPlay() {
-    this.store.dispatch(toggleisPlay({ isPlay: true }));
+  getPlayState() {
+    this.isPlay$.pipe(takeUntil(this.unsubscribe$)).subscribe(isPlay => {
+      this.isPlay = isPlay;
+    });
   }
 
   inputEvent(event) {
@@ -62,7 +70,7 @@ export class PlayPageComponent implements OnInit {
     let curWordIdx;
     this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(gameWords => {
       gameWords.forEach((curWord, idx) => {
-        if (curWord.word === inputValue) {
+        if (curWord.text === inputValue) {
           curWordIdx = idx;
           this.addScore();
         }
@@ -77,12 +85,28 @@ export class PlayPageComponent implements OnInit {
   }
 
   initInputVal(event) {
-    const initialVal = "";
-    event.target.value = initialVal;
+    event.target.value = INITIALVAL;
   }
 
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
+  toggleGamePlay() {
+    if (!this.isPlay) {
+      this.wordSubscription = this.words$.subscribe(wordData => {
+        interval(INTERVALTIME)
+          .pipe(
+            takeWhile(n => n < wordData.length && this.isPlay),
+            map(n => this.store.dispatch(setGameWord({ word: wordData[n] })))
+          )
+          .subscribe();
+      });
+      this.store.dispatch(toggleisPlay({ isPlay: true }));
+    } else {
+      this.wordSubscription.unsubscribe();
+      this.resetState();
+      this.store.dispatch(toggleisPlay({ isPlay: false }));
+    }
+  }
+
+  resetState() {
+    this.store.dispatch(resetState());
   }
 }

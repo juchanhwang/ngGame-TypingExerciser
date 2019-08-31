@@ -9,7 +9,7 @@ import {
 import { countTime } from "../app.action";
 import { Observable, Subject, timer, Subscribable, Subscription } from "rxjs";
 import { takeUntil } from "rxjs/operators";
-
+const TIMERTIME = 1000;
 @Component({
   selector: "app-play-info",
   templateUrl: "./play-info.component.html",
@@ -23,7 +23,6 @@ export class PlayInfoComponent implements OnInit, OnDestroy {
   isPlay$: Observable<boolean>;
   gameTime$: Observable<number>;
   score$: Observable<number>;
-  second: number = 1000;
 
   constructor(private store: Store<AppState>) {}
 
@@ -35,6 +34,11 @@ export class PlayInfoComponent implements OnInit, OnDestroy {
     this.unsubscribeTimer();
   }
 
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
   unsubscribeTimer() {
     this.isPlay$.subscribe(isPlay => {
       !isPlay ? this.gameTimerSubscription.unsubscribe() : null;
@@ -42,13 +46,8 @@ export class PlayInfoComponent implements OnInit, OnDestroy {
   }
 
   getCountTime() {
-    this.gameTimerSubscription = timer(this.second, this.second)
+    this.gameTimerSubscription = timer(TIMERTIME, TIMERTIME)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(time => this.store.dispatch(countTime({ time })));
-  }
-
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
   }
 }

@@ -12,6 +12,6 @@
 </div>
 <div class="input-container">
   <app-input (keyup.enter)="inputEvent($event)"></app-input>
-  <app-button routerLink="/main">Stop</app-button>
+  <button (click)="toggleGamePlay()">{{isPlay? 'STOP' : 'START'}}</button>
 </div>
 <span>{{ isPlay$ | async }}</span>

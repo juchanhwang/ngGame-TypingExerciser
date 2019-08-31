@@ -4,13 +4,14 @@ import {
   setWordData,
   toggleisPlay,
   setGameWord,
-  updateGameWords,
   addScore,
   loseScore,
   countTime,
   resetState
 } from "./app.action";
 import { GameEffects } from "./app.effects";
+import mapToGameWord from './utils/makeWordData';
+import { GameWord } from '../type';
 
 export interface AppState {
   game: GameState;
@@ -18,14 +19,14 @@ export interface AppState {
 
 export interface GameState {
   isPlay: boolean;
-  words: any[];
-  gameWords: any[];
+  words: {text: string}[];
+  gameWords: GameWord[];
   score: number;
   gameTime: number;
 }
 
 export const initialState: GameState = {
-  isPlay: true,
+  isPlay: false,
   words: [],
   gameWords: [],
   score: 5,
@@ -68,12 +69,7 @@ export const gameReducer = createReducer(
     return { ...state, words: wordData };
   }),
   on(setGameWord, (state, { word }) => {
-    // console.log(state, word)
-    return { ...state, gameWords: [...state.gameWords, word] };
-  }),
-  on(updateGameWords, state => {
-    console.log(state);
-    return { ...state, gameWords: [...state.words] };
+    return { ...state, gameWords: [...state.gameWords, mapToGameWord(word)] };
   }),
   on(removeWord, (state, action) => {
     return {
@@ -92,7 +88,9 @@ export const gameReducer = createReducer(
   on(countTime, (state, action) => {
     return { ...state, gameTime: action.time };
   }),
-  on(resetState, state => initialState)
+  on(resetState, ({ words }) => {
+    return { ...initialState, words };
+  })
 );
 
 export function reducer(state: GameState | undefined, action: Action) {
