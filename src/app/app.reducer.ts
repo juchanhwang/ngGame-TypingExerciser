@@ -68,6 +68,7 @@ export const gameReducer = createReducer(
     return { ...state, words: wordData };
   }),
   on(setGameWord, (state, { word }) => {
+    console.log(state, word)
     return { ...state, gameWords: [...state.gameWords, word] };
   }),
   on(updateGameWords, (state, { words }) => {
@@ -77,7 +78,7 @@ export const gameReducer = createReducer(
     return {
       ...state,
       gameWords: state.gameWords.filter(
-        (item, index) => index !== action.idxOfInputVal
+        (item, index) => index !== action.curWordIdx
       )
     };
   }),
@@ -90,7 +91,9 @@ export const gameReducer = createReducer(
   on(countTime, (state, action) => {
     return { ...state, gameTime: action.time };
   }),
-  on(resetState, state => initialState)
+  on(resetState, state => {
+    return { ...state, initialState };
+  })
 );
 
 export function reducer(state: GameState | undefined, action: Action) {

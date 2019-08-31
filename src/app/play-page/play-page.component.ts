@@ -22,7 +22,6 @@ export class PlayPageComponent implements OnInit {
 
   gameWords$: Observable<any[]>;
   isPlay$: Observable<boolean>;
-  isGameOver: boolean = false;
 
   constructor(private store: Store<AppState>) {}
 
@@ -35,6 +34,7 @@ export class PlayPageComponent implements OnInit {
   }
 
   resetState() {
+    console.log('reste')
     this.store.dispatch(resetState());
   }
 
@@ -49,22 +49,22 @@ export class PlayPageComponent implements OnInit {
   }
 
   removeWord(inputValue) {
-    let idxOfInputVal = this.getIdxOfInputVal(inputValue);
-    this.store.dispatch(removeWord({ idxOfInputVal }));
+    let curWordIdx = this.getCurWordIdx(inputValue);
+    this.store.dispatch(removeWord({ curWordIdx }));
   }
 
-  getIdxOfInputVal(inputValue) {
-    let IdxOfInputVal;
+  getCurWordIdx(inputValue) {
+    let curWordIdx;
     this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(gameWords => {
-      gameWords.forEach((element, idx) => {
-        if (element.word === inputValue) {
-          IdxOfInputVal = idx;
+      gameWords.forEach((curWord, idx) => {
+        if (curWord.word === inputValue) {
+          curWordIdx = idx;
           this.addScore();
         }
       });
     });
 
-    return IdxOfInputVal;
+    return curWordIdx;
   }
 
   addScore() {

@@ -23,7 +23,6 @@ export class WordComponent implements OnInit, OnDestroy {
   isPlay$: Observable<boolean>;
   gameWords$: Observable<any[]>;
   score$: Observable<number>;
-  gameTime$: Observable<number>;
 
   initTopVal: number = 35;
   maxWordTop: number = 380;
@@ -37,14 +36,9 @@ export class WordComponent implements OnInit, OnDestroy {
     this.isPlay$ = this.store.select(selectIsPlay);
     this.gameWords$ = this.store.select(selectGameWords);
     this.score$ = this.store.select(selectScore);
-    this.gameTime$ = this.store.select(selectGameTime);
 
     this.getPlay();
-    this.getWordTopVal();
-  }
-
-  toggleIsPlay(isPlay) {
-    this.store.dispatch(toggleisPlay({ isPlay: isPlay.isTrue }));
+    this.showFallingWords();
   }
 
   getPlay() {
@@ -59,39 +53,45 @@ export class WordComponent implements OnInit, OnDestroy {
     });
   }
 
+  toggleIsPlay(isPlay) {
+    this.store.dispatch(toggleisPlay({ isPlay: isPlay.isTrue }));
+  }
+
   resetGameTime() {
     const resetTime = 0;
     this.store.dispatch(countTime({ time: resetTime }));
   }
 
-  getWordTopVal() {
+  showFallingWords() {
     this.gameWords$
       .pipe(
         switchMap(
           () => interval(this.intervalTime),
-          gameWords => {
-            gameWords.forEach((word, wordIdx) => {
-              if (word.top < this.maxWordTop && !this.isGameOver) {
-                word.top += this.fallingSpeed;
-              } else if (word.top >= this.maxWordTop) {
-                word.top = this.initTopVal;
-                this.loseScore(word);
-                this.removeWord(wordIdx);
-              }
-            });
-          }
+          gameWords => this.getWordTopVal(gameWords)
         ),
         takeUntil(this.unsubscribe$)
       )
       .subscribe();
   }
 
-  loseScore(word) {
+  getWordTopVal(gameWords) {
+    gameWords.forEach((word, wordIdx) => {
+      if (word.top < this.maxWordTop && !this.isGameOver) {
+        word.top += this.fallingSpeed;
+      } else if (word.top >= this.maxWordTop) {
+        word.top = this.initTopVal;
+        this.loseScore();
+        this.removeWord(wordIdx);
+      }
+    });
+  }
+
+  loseScore() {
     this.store.dispatch(loseScore());
   }
 
   removeWord(wordIdx) {
-    this.store.dispatch(removeWord({ idxOfInputVal: wordIdx }));
+    this.store.dispatch(removeWord({ curWordIdx: wordIdx }));
   }
 
   ngOnDestroy(): void {
