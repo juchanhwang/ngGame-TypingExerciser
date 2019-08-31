@@ -25,7 +25,7 @@ export interface GameState {
 }
 
 export const initialState: GameState = {
-  isPlay: false,
+  isPlay: true,
   words: [],
   gameWords: [],
   score: 5,
@@ -68,11 +68,12 @@ export const gameReducer = createReducer(
     return { ...state, words: wordData };
   }),
   on(setGameWord, (state, { word }) => {
-    console.log(state, word)
+    // console.log(state, word)
     return { ...state, gameWords: [...state.gameWords, word] };
   }),
-  on(updateGameWords, (state, { words }) => {
-    return { ...state, gameWords: [...words] };
+  on(updateGameWords, state => {
+    console.log(state);
+    return { ...state, gameWords: [...state.words] };
   }),
   on(removeWord, (state, action) => {
     return {
@@ -91,9 +92,7 @@ export const gameReducer = createReducer(
   on(countTime, (state, action) => {
     return { ...state, gameTime: action.time };
   }),
-  on(resetState, state => {
-    return { ...state, initialState };
-  })
+  on(resetState, state => initialState)
 );
 
 export function reducer(state: GameState | undefined, action: Action) {

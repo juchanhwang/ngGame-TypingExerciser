@@ -10,7 +10,13 @@ import {
   selectGameWords,
   selectScore
 } from "../app.reducer";
-import { toggleisPlay, removeWord, addScore, resetState } from "../app.action";
+import {
+  toggleisPlay,
+  removeWord,
+  addScore,
+  resetState,
+  updateGameWords
+} from "../app.action";
 
 @Component({
   selector: "app-play-page",
@@ -34,7 +40,6 @@ export class PlayPageComponent implements OnInit {
   }
 
   resetState() {
-    console.log('reste')
     this.store.dispatch(resetState());
   }
 
