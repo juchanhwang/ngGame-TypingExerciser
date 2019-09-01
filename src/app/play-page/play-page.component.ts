@@ -20,7 +20,7 @@ import {
   updateSpeedLevel
 } from "../app.action";
 import mapToGameWord from "../utils/makeWordData";
-import { GameWord } from "../../type";
+import { GameWord, Word } from "../../type";
 const INITIALVAL = "";
 const INTERVALTIME = 1000;
 const ZERO_SCORE = 0;
@@ -37,7 +37,7 @@ export class PlayPageComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
   private wordSubscription: Subscription;
 
-  words$: Observable<{ text: string }[]>;
+  words$: Observable<any[]>;
   gameWords$: Observable<GameWord[]>;
   score$: Observable<number>;
   isPlay$: Observable<boolean>;
