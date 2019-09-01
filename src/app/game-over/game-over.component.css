@@ -1,4 +1,14 @@
-p {
-  margin: 10px;
-  font-size: 40px;
+span {
+  padding-top: 38px;
+  display: block;
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #ff4800;
+  font-weight: 600;
+}
+
+img {
+  width: 80%;
+  height: 80%;
+  opacity: 0.6;
 }
