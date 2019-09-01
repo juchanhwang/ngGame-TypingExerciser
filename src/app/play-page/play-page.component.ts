@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input, OnDestroy } from "@angular/core";
 import { Store, select } from "@ngrx/store";
 import { Observable, Subject, interval, Subscription, timer } from "rxjs";
 import { takeUntil, takeWhile, map } from "rxjs/operators";
@@ -20,6 +20,7 @@ import {
   updateSpeedLevel
 } from "../app.action";
 import mapToGameWord from "../utils/makeWordData";
+import { GameWord } from "../../type";
 const INITIALVAL = "";
 const INTERVALTIME = 1000;
 const ZERO_SCORE = 0;
@@ -32,12 +33,12 @@ const RESET_GAGE = 0;
   templateUrl: "./play-page.component.html",
   styleUrls: ["./play-page.component.css"]
 })
-export class PlayPageComponent implements OnInit {
+export class PlayPageComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
   private wordSubscription: Subscription;
 
-  words$: Observable<any[]>;
-  gameWords$: Observable<any[]>;
+  words$: Observable<{ text: string }[]>;
+  gameWords$: Observable<GameWord[]>;
   score$: Observable<number>;
   isPlay$: Observable<boolean>;
   isPlay: boolean;

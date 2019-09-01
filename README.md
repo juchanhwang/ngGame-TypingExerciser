@@ -66,73 +66,9 @@
 
 
 
-## 해당 문제점에 대한 코드상의 원인 지점과 수정 방법 🐛
+## 코드상의 문제점과 수정 방법 🐛
 
-##### 1.  문제점: score가 0점이 되어도 구독상태가 유지되어있어, 게임이 멈추지 않는다.
-
-> 해결방안
-
-- ##### word component의 template파일에 
-
-```html
-<ng-container *ngIf="score$ | async">
-  <div
-    *ngFor="let word of gameWords$ | async"
-    [style.left.px]="word.X"
-    [style.top.px]="word.Y"
-  >
-  {{ word.text }}
-  </div>
-</ng-container>
-```
-
-`<ng-container *ngIf="score$ | async">` 를 추가했다. 즉, score가 존재할 때까지만 구독을 하는 것이다. 하지만 또 다른 문제가 발생했다. score가 '0'점이 되는 순간 구독이 취소 되었다가 다시 구독이 되는 문제가 발생했다.
-
-
-
-##### 1-1. 문제점: score가 0보다 작아질 때, 즉 false가 아닐 때 다시 구독이 된다.
-
-> 해결방안
-
-- `<ng-container *ngIf="isPlay$ | async">` 로 수정했다. `score === 0` 이면, `isPlay = false`의 값을 할당 받는다. isPlay의 값이 'true' 일 때에만 구독한다.
-
-```html
-<ng-container *ngIf="isPlay$ | async">
-    <div
-      *ngFor="let word of gameWords$ | async"
-      [style.left.px]="word.X"
-      [style.top.px]="word.Y"
-    >
-    {{ word.text }}
-  </div>
-</ng-container>
-```
-
-  ```js
-gameWords$: Observable<any[]> = this.store.select(
-    selectGameWords,
-    takeUntil(this.unsubscribe$)
-);
-  
-/*...*/
-    if (score === ZERO_SCORE) {
-      this.isGameOver = true;
-      this.toggleIsPlay({ isTrue: false });
-      this.resetGameTime();
-    } else {
-      this.toggleIsPlay({ isTrue: true });
-    }
-/*...*/
-  
-ngOnDestroy(): void {
-  this.unsubscribe$.next();
-  this.unsubscribe$.complete();
-}
-  ```
-
-
-
-2. ##### PLAY/STOP 버튼을 눌러서 한번 /play 주소로 이동했다가 한번 더 버튼을 눌러서 게임 취소한다음 다시 플레이를 누르면 새로 시작되지 않고, 첫번째 플레이 시도에서 발생한 Subscription들이 여전히 남아있음
+1. ##### PLAY/STOP 버튼을 눌러서 한번 /play 주소로 이동했다가 한번 더 버튼을 눌러서 게임 취소한다음 다시 플레이를 누르면 새로 시작되지 않고, 첫번째 플레이 시도에서 발생한 Subscription들이 여전히 남아있음
 
 > 해결방안
 
@@ -160,9 +96,39 @@ export const resetState = createAction("[meta] resetState");
 this.store.dispatch(resetState());
 ```
 
+- `<ng-container *ngIf="isPlay$ | async">` 로 수정했다. `score === 0`   이면, `isPlay = false`의 값을 할당 받는다. isPlay의 값이 'true' 일 때에만 구독한다.
 
+```html
+<ng-container *ngIf="isPlay$ | async">
+    <div
+      *ngFor="let word of gameWords$ | async"
+      [style.left.px]="word.X"
+      [style.top.px]="word.Y"
+    >
+    {{ word.text }}
+  </div>
+</ng-container>
+```
 
-3. ##### subscribe 안에서 subscribe를 하고있음
+- 모든 컴포넌트에 ngOnDestroy 함수를 추가. 컴포넌트가 삭제되는 시점(ngOnDestroy)에 구독이 취소 될 수 있도록 takeUntil() 사용.
+
+```typescript
+private unsubscribe$ = new Subject<void>();
+
+gameWords$: Observable<GameWord[]>;
+
+ngOnInit() {
+  this.gameWords$ = this.store.select(selectGameWords);
+  this.gameWords$.pipe(takeUntil(unsubscribe$)).subscribe(()=>{});
+}
+  
+ngOnDestroy(): void {
+  this.unsubscribe$.next();
+  this.unsubscribe$.complete();
+}
+```
+
+2. ##### subscribe 안에서 subscribe를 하고있음
 
 ```js
 this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(words => {

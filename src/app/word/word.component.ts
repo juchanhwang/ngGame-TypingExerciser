@@ -91,11 +91,13 @@ export class WordComponent implements OnInit, OnDestroy {
   }
 
   updateFallingSpeed() {
-    this.speedLevel$.pipe(takeUntil(this.unsubscribe$)).subscribe(speedLevel => {
-      if (this.nextSpeedLevel === speedLevel) {
-        this.fallingSpeed = this.fallingSpeed * 1.5;
-        this.nextSpeedLevel++;
-      }
-    });
+    this.speedLevel$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(speedLevel => {
+        if (this.nextSpeedLevel === speedLevel) {
+          this.fallingSpeed = this.fallingSpeed * 1.5;
+          this.nextSpeedLevel++;
+        }
+      });
   }
 }
