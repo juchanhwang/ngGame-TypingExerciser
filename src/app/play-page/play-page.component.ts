@@ -16,7 +16,8 @@ import {
   addScore,
   resetState,
   setGameWord,
-  countTime
+  countTime,
+  updateSpeedLevel
 } from "../app.action";
 import mapToGameWord from "../utils/makeWordData";
 const INITIALVAL = "";
@@ -24,6 +25,8 @@ const INTERVALTIME = 1000;
 const ZERO_SCORE = 0;
 const RESET_TIME = 0;
 const DELAY_TIME = 3000;
+const MAX_GAGE = 10;
+const RESET_GAGE = 0;
 @Component({
   selector: "app-play-page",
   templateUrl: "./play-page.component.html",
@@ -39,6 +42,7 @@ export class PlayPageComponent implements OnInit {
   isPlay$: Observable<boolean>;
   isPlay: boolean;
   isGameOver: boolean = false;
+  speedLevelGage: number = 0;
 
   constructor(private store: Store<AppState>) {}
 
@@ -48,7 +52,8 @@ export class PlayPageComponent implements OnInit {
     this.isPlay$ = this.store.select(selectIsPlay);
     this.score$ = this.store.select(selectScore);
 
-    this.getPlay();
+    this.getPlayState();
+    this.getGameOver();
   }
 
   ngOnDestroy(): void {
@@ -56,11 +61,13 @@ export class PlayPageComponent implements OnInit {
     this.unsubscribe$.complete();
   }
 
-  getPlay() {
+  getPlayState() {
     this.isPlay$.pipe(takeUntil(this.unsubscribe$)).subscribe(isPlay => {
       this.isPlay = isPlay;
     });
+  }
 
+  getGameOver() {
     this.score$.pipe(takeUntil(this.unsubscribe$)).subscribe(score => {
       if (score === ZERO_SCORE) {
         this.isGameOver = true;
@@ -70,10 +77,6 @@ export class PlayPageComponent implements OnInit {
         this.isGameOver = false;
       }
     });
-  }
-
-  toggleIsPlay(isPlay) {
-    this.store.dispatch(toggleisPlay({ isPlay: isPlay.isTrue }));
   }
 
   resetGameTime() {
@@ -102,7 +105,17 @@ export class PlayPageComponent implements OnInit {
   }
 
   addScore() {
+    this.getSpeedLevelGage();
     this.store.dispatch(addScore());
+  }
+
+  getSpeedLevelGage() {
+    if (this.speedLevelGage === MAX_GAGE) {
+      this.store.dispatch(updateSpeedLevel());
+      this.speedLevelGage = RESET_GAGE;
+    } else {
+      this.speedLevelGage++;
+    }
   }
 
   initInputVal(event) {
@@ -110,20 +123,24 @@ export class PlayPageComponent implements OnInit {
   }
 
   toggleGamePlay() {
-    if (!this.isPlay) {
-      this.wordSubscription = this.words$.subscribe(wordData => {
-        interval(INTERVALTIME)
-          .pipe(
-            takeWhile(n => n < wordData.length && this.isPlay),
-            map(n => this.store.dispatch(setGameWord({ word: wordData[n] })))
-          )
-          .subscribe();
-      });
-      this.store.dispatch(toggleisPlay({ isPlay: true }));
-    } else {
-      this.wordSubscription.unsubscribe();
-      this.resetState();
-    }
+    !this.isPlay ? this.setGameWord() : this.resetGameWord();
+  }
+
+  setGameWord() {
+    this.wordSubscription = this.words$.subscribe(wordData => {
+      interval(INTERVALTIME)
+        .pipe(
+          takeWhile(n => n < wordData.length && this.isPlay),
+          map(n => this.store.dispatch(setGameWord({ word: wordData[n] })))
+        )
+        .subscribe();
+    });
+    this.store.dispatch(toggleisPlay({ isPlay: true }));
+  }
+
+  resetGameWord() {
+    this.wordSubscription.unsubscribe();
+    this.resetState();
   }
 
   resetState() {

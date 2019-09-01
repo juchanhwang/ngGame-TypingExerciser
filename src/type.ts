@@ -1,7 +1,7 @@
 export interface GameWord {
   text: string;
-  left: number;
-  top: number;
+  Y: number;
+  X: number;
 }
 
 export interface Word {

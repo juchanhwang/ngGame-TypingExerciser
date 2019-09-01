@@ -7,11 +7,12 @@ import {
   addScore,
   loseScore,
   countTime,
-  resetState
+  resetState,
+  updateSpeedLevel
 } from "./app.action";
 import { GameEffects } from "./app.effects";
-import mapToGameWord from './utils/makeWordData';
-import { GameWord } from '../type';
+import mapToGameWord from "./utils/makeWordData";
+import { GameWord } from "../type";
 
 export interface AppState {
   game: GameState;
@@ -19,10 +20,11 @@ export interface AppState {
 
 export interface GameState {
   isPlay: boolean;
-  words: {text: string}[];
+  words: { text: string }[];
   gameWords: GameWord[];
   score: number;
   gameTime: number;
+  speedLevel: number;
 }
 
 export const initialState: GameState = {
@@ -30,7 +32,8 @@ export const initialState: GameState = {
   words: [],
   gameWords: [],
   score: 5,
-  gameTime: 0
+  gameTime: 0,
+  speedLevel: 0
 };
 
 export const selectState = (state: AppState) => state.game;
@@ -60,6 +63,11 @@ export const selectGameTime = createSelector(
   (state: GameState) => state.gameTime
 );
 
+export const selectSpeedLevel = createSelector(
+  selectState,
+  (state: GameState) => state.speedLevel
+);
+
 export const gameReducer = createReducer(
   initialState,
   on(toggleisPlay, (state, { isPlay }) => {
@@ -87,6 +95,9 @@ export const gameReducer = createReducer(
   }),
   on(countTime, (state, action) => {
     return { ...state, gameTime: action.time };
+  }),
+  on(updateSpeedLevel, state => {
+    return { ...state, speedLevel: state.speedLevel + 1 };
   }),
   on(resetState, ({ words }) => {
     return { ...initialState, words };

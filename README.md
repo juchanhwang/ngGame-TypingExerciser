@@ -10,29 +10,23 @@
 
 
 
-## 요구사항
+## 기능 (수정)
 
-### /main 주소 화면
+### /main 주소
 
-- 네모난 div 박스 하나를 그립니다. (게임 화면)
-
-- 박스 바로 밑에 단어를 입력할 수 있는 input[type=text] 태그를 배치하고, Start 버튼을 input 태그 오른쪽에 보여줍니다.
-
-- Start 버튼을 누르면 /play 주소로 이동합니다.
+- 헤더의 'TYPING EXERCISER'를 클릭하면 /main으로 이동
+- 카테고리 중 '게임하러 가기'를 누르면 /play 화면으로 이동
 
 
 
-### /play 주소로 들어갔을 때 화면
+### /play 주소
 
-- /main 화면과 똑같은 UI로 보여주되 Start 버튼 자리에 Stop 버튼이 보입니다. (Stop 버튼은 말그대로 게임 중단하는 것입니다)
-
-- Stop 버튼을 눌렀을 때는 /main으로 이동시키면 됩니다.
-
-- 게임 화면에서 위에서 아래로 랜덤한 단어들이 떨어집니다. (시작 x 좌표 위치는 매번 랜덤하게 떨어져야합니다.)
-
-- 단어를 맞출 때마다 점수 1점씩 획득하고, 화면 밑에까지 내려갔는데 타이핑하지 못 했을 경우 점수를 1점 깎습니다.
-
-- 처음에 점수 시작은 5점에서 시작하고, 점수가 0점이 되면 Game Over 를 보여줍니다.
+- 하단에 'START' 버튼을 클릭하면 게임 시작
+- 'STOP' 버튼을 클릭하면 /play 초기화면으로 이동 (state 초기화)
+- 게임 화면에서 위에서 아래로 랜덤한 단어들이 떨어짐 (시작 x 좌표 위치는 매번 랜덤하게 떨어져야합니다.)
+- 단어를 맞출 때마다 점수 1점씩 획득하고, 화면 밑에까지 내려갔는데 타이핑하지 못 했을 경우 점수를 1점 깎음
+- 처음에 점수 시작은 5점에서 시작하고, 점수가 0점이 되면 Game Over를(3초간) 보여주고 /play 초기 화면으로 이동
+- 단어를 10개씩 맞출 때마다 내려오는 속도가 1.5배 증가
 
 
 
@@ -84,8 +78,8 @@
 <ng-container *ngIf="score$ | async">
   <div
     *ngFor="let word of gameWords$ | async"
-    [style.left.px]="word.left"
-    [style.top.px]="word.top"
+    [style.left.px]="word.X"
+    [style.top.px]="word.Y"
   >
   {{ word.text }}
   </div>
@@ -106,8 +100,8 @@
 <ng-container *ngIf="isPlay$ | async">
     <div
       *ngFor="let word of gameWords$ | async"
-      [style.left.px]="word.left"
-      [style.top.px]="word.top"
+      [style.left.px]="word.X"
+      [style.top.px]="word.Y"
     >
     {{ word.text }}
   </div>
@@ -135,8 +129,6 @@ ngOnDestroy(): void {
   this.unsubscribe$.complete();
 }
   ```
-
-  
 
 
 
@@ -170,7 +162,7 @@ this.store.dispatch(resetState());
 
 
 
-3. ##### Subscribe 안에서 subscribe를 하고있음
+3. ##### subscribe 안에서 subscribe를 하고있음
 
 ```js
 this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(words => {
@@ -178,11 +170,12 @@ this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(words => {
     .pipe(takeUntil(this.unsubscribe$))
     .subscribe(() => {
       words.forEach(word => {
-        if (word.top < this.maxWordTop && !this.isGameOver) {
-          word.top += this.fallingSpeed;
-        } else if (word.top === this.maxWordTop) {
-          this.loseScore(word);
-          word.top++;
+        if (word.Y < MAX_WORD_Y && !this.isGameOver) {
+          word.Y += FALLING_SPEED;
+        } else if (word.Y === MAX_WORD_Y) {
+	      	word.Y = INITIAL_Y_VALUE;
+      		this.loseScore();
+		      this.removeWord(wordIdx);
         }
       });
     });
@@ -194,32 +187,50 @@ this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(words => {
 -  switchMap 함수 활용
 
 ```javascript
-showFallingWords() {
-  this.gameWords$
-    .pipe(
-      switchMap(
-        () => interval(INTERVAL_TIME),
-        gameWords => this.getWordTopVal(gameWords)
-      ),
-      takeUntil(this.unsubscribe$)
-    )
-    .subscribe();
+  showFallingWords() {
+    this.gameWords$
+      .pipe(
+        switchMap(
+          () => interval(INTERVAL_TIME),
+          gameWords => this.getWordXVal(gameWords)
+        ),
+        takeUntil(this.unsubscribe$)
+      )
+      .subscribe();
+  }
+
+  getWordXVal(gameWords) {
+    gameWords.forEach((word, wordIdx) => {
+      if (word.Y < MAX_WORD_Y && !this.isGameOver) {
+        word.Y += FALLING_SPEED;
+      } else if (word.Y >= MAX_WORD_Y) {
+        word.Y = INITIAL_Y_VALUE;
+        this.loseScore();
+        this.removeWord(wordIdx);
+      }
+    });
+  }
+```
+
+#### 추가적인 수정 사항들
+
+-  gameWord를 설정하는 함수를 app component에서 play component로 이동 (play 컴포넌트에서 설정하는 것이 적절하다고 판단)
+- 컴포넌트가 삭제되었을 때 구독을 취소하는 기능 추가 (takeUntil(unsubScribe$), ngOnDestroy)
+- 타입 설정 해주는 type.ts 파일 추가
+
+```typescript
+export interface GameWord {
+  text: string;
+  Y: number;
+  X: number;
 }
 
-getWordTopVal(gameWords) {
-  gameWords.forEach((word, wordIdx) => {
-    if (word.top < MAX_WORD_TOP && !this.isGameOver) {
-      word.top += FALLING_SPEED;
-    } else if (word.top >= MAX_WORD_TOP) {
-      word.top = INITIAL_TOP_VALUE;
-      this.loseScore();
-      this.removeWord(wordIdx);
-    }
-  });
+export interface Word {
+  text: string;
 }
 ```
 
-
+- 함수 분리. 함수가 하나의 역할만 할 수 있게
 
 
 

@@ -4,11 +4,41 @@
   align-items: center;
   text-align: center;
   background: #f6f9fc;
-  margin : 0 272px;
+  margin: 0 272px;
   height: 400px;
 }
 
-button {
-  width: 100%;
-  height: 50%;
+a {
+  width: 23%;
+  height: 264px;
+  margin-bottom: 4%;
+  margin-right: 2%;
+  margin-left: 2%;
+  border-radius: 5px;
+  float: left;
+  border: 2px solid #e5e5e5;
+  text-decoration: none;
+  color: #000000;
+  cursor: pointer;
+}
+
+a:hover {
+  transition-property: background-color, color;
+  transition-duration: 0.5s;
+  transition-timing-function: ease-out;
+  background-color: #ffffff;
+}
+
+span {
+  display: block;
+  font-size: 18px;
+  margin: 10px 0 15px;
+  color: #2d2c2d;
+  font-weight: 600;
+}
+
+img {
+  width: 80%;
+  height: 80%;
+  opacity: 0.6;
 }

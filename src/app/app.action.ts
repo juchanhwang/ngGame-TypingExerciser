@@ -11,5 +11,6 @@ export const removeWord = createAction("removeWord", props<{ curWordIdx: number 
 export const countTime = createAction("countTime", props<{ time: number }>());
 export const addScore = createAction("addScore");
 export const loseScore = createAction("loseScore");
+export const updateSpeedLevel = createAction("updateSpeedLevel");
 
 export const resetState = createAction("[meta] resetState");

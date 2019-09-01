@@ -1,8 +1,8 @@
 <ng-container *ngIf="isPlay$ | async">
   <div
     *ngFor="let word of gameWords$ | async"
-    [style.left.px]="word.left"
-    [style.top.px]="word.top"
+    [style.left.px]="word.X"
+    [style.top.px]="word.Y"
   >
   {{ word.text }}
   </div>
