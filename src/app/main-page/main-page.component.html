@@ -1,3 +1,7 @@
-<h1>메인입니당</h1>
-
+<div class="screen" *ngIf="!(isPlay$ | async)">
+<button>자리 연습</button>
+<button>낱말 연습</button>
+<button>짧은글 연습</button>
+<button>긴글 연습</button>
 <button routerLink="/play">게임하러가기</button>
+</div>

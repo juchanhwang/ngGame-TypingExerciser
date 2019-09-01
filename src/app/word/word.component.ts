@@ -16,8 +16,6 @@ const INTERVAL_TIME = 60;
 const INITIAL_TOP_VALUE = 35;
 const MAX_WORD_TOP = 380;
 const FALLING_SPEED = 2;
-const RESET_TIME = 0;
-const ZERO_SCORE = 0;
 
 @Component({
   selector: "app-word",
@@ -29,7 +27,6 @@ export class WordComponent implements OnInit, OnDestroy {
 
   isPlay$: Observable<boolean>;
   gameWords$: Observable<GameWord[]>;
-  score$: Observable<number>;
 
   isGameOver: boolean = false;
 
@@ -38,35 +35,13 @@ export class WordComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.isPlay$ = this.store.select(selectIsPlay);
     this.gameWords$ = this.store.select(selectGameWords);
-    this.score$ = this.store.select(selectScore);
 
-    this.getPlay();
     this.showFallingWords();
   }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
-  }
-
-  getPlay() {
-    this.score$.pipe(takeUntil(this.unsubscribe$)).subscribe(score => {
-      if (score === ZERO_SCORE) {
-        this.isGameOver = true;
-        this.toggleIsPlay({ isTrue: false });
-        this.resetGameTime();
-      } else {
-        this.toggleIsPlay({ isTrue: true });
-      }
-    });
-  }
-
-  toggleIsPlay(isPlay) {
-    this.store.dispatch(toggleisPlay({ isPlay: isPlay.isTrue }));
-  }
-
-  resetGameTime() {
-    this.store.dispatch(countTime({ time: RESET_TIME }));
   }
 
   showFallingWords() {

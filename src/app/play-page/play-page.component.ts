@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { Store, select } from "@ngrx/store";
-import { Observable, Subject, interval, Subscription } from "rxjs";
+import { Observable, Subject, interval, Subscription, timer } from "rxjs";
 import { takeUntil, takeWhile, map } from "rxjs/operators";
 
 import {
@@ -15,11 +15,15 @@ import {
   removeWord,
   addScore,
   resetState,
-  setGameWord
+  setGameWord,
+  countTime
 } from "../app.action";
 import mapToGameWord from "../utils/makeWordData";
 const INITIALVAL = "";
 const INTERVALTIME = 1000;
+const ZERO_SCORE = 0;
+const RESET_TIME = 0;
+const DELAY_TIME = 3000;
 @Component({
   selector: "app-play-page",
   templateUrl: "./play-page.component.html",
@@ -31,8 +35,10 @@ export class PlayPageComponent implements OnInit {
 
   words$: Observable<any[]>;
   gameWords$: Observable<any[]>;
+  score$: Observable<number>;
   isPlay$: Observable<boolean>;
   isPlay: boolean;
+  isGameOver: boolean = false;
 
   constructor(private store: Store<AppState>) {}
 
@@ -40,8 +46,9 @@ export class PlayPageComponent implements OnInit {
     this.words$ = this.store.select(selectWords);
     this.gameWords$ = this.store.select(selectGameWords);
     this.isPlay$ = this.store.select(selectIsPlay);
+    this.score$ = this.store.select(selectScore);
 
-    this.getPlayState();
+    this.getPlay();
   }
 
   ngOnDestroy(): void {
@@ -49,10 +56,28 @@ export class PlayPageComponent implements OnInit {
     this.unsubscribe$.complete();
   }
 
-  getPlayState() {
+  getPlay() {
     this.isPlay$.pipe(takeUntil(this.unsubscribe$)).subscribe(isPlay => {
       this.isPlay = isPlay;
     });
+
+    this.score$.pipe(takeUntil(this.unsubscribe$)).subscribe(score => {
+      if (score === ZERO_SCORE) {
+        this.isGameOver = true;
+        this.resetGameTime();
+        timer(DELAY_TIME).subscribe(() => this.resetState());
+      } else {
+        this.isGameOver = false;
+      }
+    });
+  }
+
+  toggleIsPlay(isPlay) {
+    this.store.dispatch(toggleisPlay({ isPlay: isPlay.isTrue }));
+  }
+
+  resetGameTime() {
+    this.store.dispatch(countTime({ time: RESET_TIME }));
   }
 
   inputEvent(event) {
@@ -69,13 +94,9 @@ export class PlayPageComponent implements OnInit {
   getCurWordIdx(inputValue) {
     let curWordIdx;
     this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(gameWords => {
-      gameWords.forEach((curWord, idx) => {
-        if (curWord.text === inputValue) {
-          curWordIdx = idx;
-          this.addScore();
-        }
-      });
+      curWordIdx = gameWords.findIndex(curWord => curWord.text === inputValue);
     });
+    curWordIdx >= 0 ? this.addScore() : null;
 
     return curWordIdx;
   }
@@ -102,7 +123,6 @@ export class PlayPageComponent implements OnInit {
     } else {
       this.wordSubscription.unsubscribe();
       this.resetState();
-      this.store.dispatch(toggleisPlay({ isPlay: false }));
     }
   }
 

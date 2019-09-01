@@ -1,4 +1,4 @@
-h1 {
+div {
   position: relative;
   height: 96px;
   text-align: center;
@@ -9,4 +9,10 @@ h1 {
   text-decoration: none;
   background-color: #2d2c2d;
   opacity: 0.8;
+}
+
+h1 {
+  width: 15%;
+  height: 100%;
+  cursor: pointer;
 }
