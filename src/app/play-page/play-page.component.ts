@@ -45,7 +45,7 @@ export class PlayPageComponent implements OnInit, OnDestroy {
   isGameOver: boolean = false;
   speedLevelGage: number = 0;
 
-  constructor(private store: Store<AppState>) {}
+  constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
     this.words$ = this.store.select(selectWords);
@@ -100,7 +100,9 @@ export class PlayPageComponent implements OnInit, OnDestroy {
     this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(gameWords => {
       curWordIdx = gameWords.findIndex(curWord => curWord.text === inputValue);
     });
-    curWordIdx >= 0 ? this.addScore() : null;
+    if (curWordIdx >= 0) {
+      this.addScore();
+    }
 
     return curWordIdx;
   }

@@ -39,14 +39,12 @@ export class MainComponent extends AbstractBaseComponent {
    ngOnInit() {
       this._sub.push(
          this.store$.select(selectScore).subscribe((score) => {
-		console.log(score);
+				   console.log(score);
          })
       );
    }
 }
 ```
-
-
 
 이렇게 _sub에 넣어주기만 하면 ngOnDestroy 에서 알아서 unsubscribe 해주는 구조를 채택하고 있습니다.
 
@@ -60,8 +58,6 @@ gameTimerSubscription: Subscription;
 
 
 
-
-
 ### 3. play-page.component.ts 에서 103번째 줄에 curWordIdx >= ? .() : 
 
 이럴 때는
@@ -72,7 +68,7 @@ gameTimerSubscription: Subscription;
  }
 ```
 
-로 작성해주시는게 좋습니다. null을 리턴해도 그 statement가 아무런 행동을 하지 않기 때문에 좋은 코딩 스타일은 아니라고 생각합니다. :) 
+로 작성해주시는게 좋습니다. **null을 리턴해도 그 statement가 아무런 행동을 하지 않기 때문에 좋은 코딩 스타일은 아니**라고 생각합니다. :) 
 
 
 
