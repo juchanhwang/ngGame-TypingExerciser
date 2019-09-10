@@ -17,7 +17,7 @@ import {
   removeWord,
   updateSpeedLevel
 } from "../app.action";
-import { switchMap, takeUntil, tap, mergeMap } from "rxjs/operators";
+import { switchMap, takeUntil, tap, mergeMap, withLatestFrom, map } from "rxjs/operators";
 import { GameWord } from "../../type";
 const INTERVAL_TIME = 60;
 const INITIAL_Y_VALUE = 35;
@@ -41,7 +41,7 @@ export class WordComponent implements OnInit, OnDestroy {
   fallingSpeed: number = 5;
   nextSpeedLevel: number = 1;
 
-  constructor(private store: Store<AppState>) {}
+  constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
     this.isPlay$ = this.store.select(selectIsPlay);
@@ -59,14 +59,11 @@ export class WordComponent implements OnInit, OnDestroy {
   }
 
   showFallingWords() {
-    this.gameWords$
-      .pipe(
-        switchMap(
-          () => interval(INTERVAL_TIME),
-          gameWords => this.getWordXVal(gameWords)
-        ),
-        takeUntil(this.unsubscribe$)
-      )
+    interval(INTERVAL_TIME).pipe(
+      withLatestFrom(this.gameWords$), // outer observable이 돌아간 시점의 gameWord 상태값을 가져옴
+      map(([, gameWords]) => this.getWordXVal(gameWords)),
+      takeUntil(this.unsubscribe$)
+    )
       .subscribe();
   }
 

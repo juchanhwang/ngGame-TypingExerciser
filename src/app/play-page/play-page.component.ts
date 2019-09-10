@@ -97,9 +97,11 @@ export class PlayPageComponent implements OnInit, OnDestroy {
 
   getCurWordIdx(inputValue) {
     let curWordIdx;
-    this.gameWords$.pipe(takeUntil(this.unsubscribe$)).subscribe(gameWords => {
-      curWordIdx = gameWords.findIndex(curWord => curWord.text === inputValue);
-    });
+    this.gameWords$.pipe(
+      takeUntil(this.unsubscribe$))
+      .subscribe(gameWords => {
+        curWordIdx = gameWords.findIndex(curWord => curWord.text === inputValue);
+      });
     if (curWordIdx >= 0) {
       this.addScore();
     }
