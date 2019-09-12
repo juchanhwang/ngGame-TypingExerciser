@@ -11,11 +11,6 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2015",
-    "plugins": [
-      {
-        "name": "typescript-tslint-plugin"
-      }
-    ],
     "typeRoots": [
       "node_modules/@types"
     ],
