@@ -14,12 +14,12 @@ export class GameEffects {
       ofType(getWordData),
       mergeMap(() =>
         this.apiService.getWordList().pipe(
-          map((wordData: Word[]) =>  setWordData({ wordData })),
+          map((wordData: Word[]) => setWordData({ wordData })),
           catchError(() => EMPTY)
         )
       )
     )
   );
 
-  constructor(private actions$: Actions, private apiService: AppService) {}
+  constructor(private actions$: Actions, private apiService: AppService) { }
 }
