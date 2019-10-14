@@ -48,6 +48,7 @@ export class PlayPageComponent implements OnInit, OnDestroy {
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
+    console.log('hi');
     this.words$ = this.store.select(selectWords);
     this.gameWords$ = this.store.select(selectGameWords);
     this.isPlay$ = this.store.select(selectIsPlay);

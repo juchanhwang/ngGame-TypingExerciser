@@ -33,7 +33,7 @@ import { GameOverComponent } from "./game-over/game-over.component";
     BrowserModule,
     HttpClientModule,
     AppRoutingModule,
-    StoreModule.forRoot({ game: AppReducer.reducer }),
+    StoreModule.forRoot({ game: AppReducer.gameReducer }),
     StoreDevtoolsModule.instrument({
       maxAge: 25 // Retains last 25 states
     }),
