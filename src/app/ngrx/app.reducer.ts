@@ -74,6 +74,8 @@ export const gameReducer = createReducer(
     return { ...state, isPlay };
   }),
   on(setWordData, (state, { wordData }) => {
+    debugger;
+    console.log(state, wordData)
     return { ...state, words: wordData };
   }),
   on(setGameWord, (state, { word }) => {
@@ -103,7 +105,3 @@ export const gameReducer = createReducer(
     return { ...initialState, words };
   })
 );
-
-export function reducer(state: GameState | undefined, action: Action) {
-  return gameReducer(state, action);
-}
