@@ -1,5 +1,5 @@
 import { createAction, props } from "@ngrx/store";
-import { Word, GameWord } from '../type';
+import { Word } from '../../type';
 
 
 export const getWordData = createAction("[meta] getWordData");

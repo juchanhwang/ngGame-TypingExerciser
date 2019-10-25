@@ -1,8 +1,8 @@
 import { Component } from "@angular/core";
 import { Store } from "@ngrx/store";
+import { AppState } from './ngrx/app.reducer';
+import { getWordData } from './ngrx/app.action';
 
-import { AppState } from "./app.reducer";
-import { getWordData } from "./app.action";
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",

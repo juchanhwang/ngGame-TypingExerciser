@@ -2,25 +2,11 @@ import { Component, OnInit, Input, OnDestroy } from "@angular/core";
 import { Store, select } from "@ngrx/store";
 import { Observable, Subject, interval, Subscription, timer } from "rxjs";
 import { takeUntil, takeWhile, map } from "rxjs/operators";
+import { GameWord } from '../../../type';
+import { AppState, selectWords, selectGameWords, selectIsPlay, selectScore } from '../../ngrx/app.reducer';
+import { countTime, removeWord, addScore, updateSpeedLevel, setGameWord, toggleisPlay, resetState } from '../../ngrx/app.action';
 
-import {
-  AppState,
-  selectIsPlay,
-  selectWords,
-  selectGameWords,
-  selectScore
-} from "../app.reducer";
-import {
-  toggleisPlay,
-  removeWord,
-  addScore,
-  resetState,
-  setGameWord,
-  countTime,
-  updateSpeedLevel
-} from "../app.action";
-import mapToGameWord from "../utils/makeWordData";
-import { GameWord, Word } from "../../type";
+
 const INITIALVAL = "";
 const INTERVALTIME = 1000;
 const ZERO_SCORE = 0;

@@ -1,9 +1,8 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Store, select } from "@ngrx/store";
 import { Observable, Subject } from "rxjs";
-
-import { AppState, selectIsPlay } from "../app.reducer";
-import { toggleisPlay } from "../app.action";
+import { AppState, selectIsPlay } from '../../ngrx/app.reducer';
+import { toggleisPlay } from '../../ngrx/app.action';
 
 @Component({
   selector: "app-main-page",

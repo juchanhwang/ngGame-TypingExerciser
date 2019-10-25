@@ -5,18 +5,16 @@ import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { HttpClientModule } from "@angular/common/http";
 import { AppRoutingModule } from "./app-routing.module";
 import { EffectsModule } from "@ngrx/effects";
-
 import { AppComponent } from "./app.component";
-import { HeaderComponent } from "./header/header.component";
-import { PlayPageComponent } from "./play-page/play-page.component";
-import { MainPageComponent } from "./main-page/main-page.component";
-import { InputComponent } from "./input/input.component";
-import { WordComponent } from "./word/word.component";
-import { PlayInfoComponent } from "./play-info/play-info.component";
-
-import * as AppReducer from "./app.reducer";
-import { GameEffects } from "./app.effects";
-import { GameOverComponent } from "./game-over/game-over.component";
+import { HeaderComponent } from './component/header/header.component';
+import { PlayPageComponent } from './page/play-page/play-page.component';
+import { InputComponent } from './component/input/input.component';
+import { WordComponent } from './component/word/word.component';
+import { MainPageComponent } from './page/main-page/main-page.component';
+import { PlayInfoComponent } from './component/play-info/play-info.component';
+import { GameOverComponent } from './component/game-over/game-over.component';
+import * as AppReducer from "./ngrx/app.reducer";
+import { GameEffects } from './ngrx/app.effects';
 
 @NgModule({
   declarations: [
@@ -42,4 +40,4 @@ import { GameOverComponent } from "./game-over/game-over.component";
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule { }

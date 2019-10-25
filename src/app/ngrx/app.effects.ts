@@ -2,10 +2,9 @@ import { Injectable } from "@angular/core";
 import { Actions, ofType, createEffect } from "@ngrx/effects";
 import { EMPTY } from "rxjs";
 import { map, mergeMap, catchError, takeWhile } from "rxjs/operators";
-import { AppService } from "./app.service";
 import { getWordData, setWordData } from "./app.action";
-import makeWordData from "./utils/makeWordData";
-import { Word } from '../type';
+import { Word } from '../../type';
+import { AppService } from '../service/app.service';
 
 @Injectable()
 export class GameEffects {

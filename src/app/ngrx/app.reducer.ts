@@ -11,8 +11,8 @@ import {
   updateSpeedLevel
 } from "./app.action";
 import { GameEffects } from "./app.effects";
-import mapToGameWord from "./utils/makeWordData";
-import { GameWord } from "../type";
+import { GameWord } from '../../type';
+import mapToGameWord from '../component/utils/makeWordData';
 
 export interface AppState {
   game: GameState;
